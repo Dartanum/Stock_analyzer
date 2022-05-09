@@ -10,4 +10,4 @@
     3. Download **ngrok**: https://dashboard.ngrok.com/get-started/setup
     4. Run server and add "Forwarding" link to webhookPath and server port
     5. Also add account's phone number and username to appropriate properties
-4. Send query: https://api.telegram.org/bot<token>/setWebhook?url=<webhookPath>
+4. Send query: https://api.telegram.org/bot<token\>/setWebhook?url=<webhookPath\>
