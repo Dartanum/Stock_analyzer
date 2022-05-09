@@ -1,0 +1,23 @@
+chromedriver: driver/chromedriver.exe
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+
+telegram:
+  bot:
+    token: 'your_token'
+    username: '@your_bot_name'
+    webhookPath: 'your_webhook_path'
+  user:
+    phone-number: '+78888888888'
+    admin-username: 'your_tg_username'
+
+server:
+  port: 8080
+
+values:
+  number-of-days-for-collect-data: 3
+  min-words-in-message: 8
