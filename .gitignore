@@ -1,8 +1,6 @@
 HELP.md
 target/
 driver/
-!src/main/resources/application.yaml
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -33,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/application.yaml
+/.mvn/wrapper/maven-wrapper.jar

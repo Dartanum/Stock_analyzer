@@ -6,9 +6,9 @@ create table channel
 
 create table post
 (
-    id            bigint not null primary key,
-    content       text,
-    channel_id    int    not null references channel,
+    id            bigint    not null primary key,
+    content       text      unique,
+    channel_id    int       not null references channel,
     creation_date timestamp
 );
 

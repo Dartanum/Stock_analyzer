@@ -19,5 +19,7 @@ server:
   port: 8080
 
 values:
-  number-of-days-for-collect-data: 3
-  min-words-in-message: 8
+  parser:
+    number-of-days-for-collect-data: 3
+    min-words-in-message: 8
+    key-words: BTC,LUNA,ETH

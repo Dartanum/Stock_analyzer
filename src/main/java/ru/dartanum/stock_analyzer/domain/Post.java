@@ -33,11 +33,11 @@ public class Post {
         if (this == o) return true;
         if (!(o instanceof Post)) return false;
         Post post = (Post) o;
-        return Objects.equals(content, post.content) && Objects.equals(creationDate, post.creationDate);
+        return Objects.equals(channel, post.channel) && Objects.equals(creationDate, post.creationDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(content, creationDate);
+        return Objects.hash(channel.getId(), creationDate);
     }
 }

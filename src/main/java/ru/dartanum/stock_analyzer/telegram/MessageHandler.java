@@ -18,30 +18,31 @@ public class MessageHandler {
     public BotApiMethod<?> handle(Message message, BotState state, Consumer<String> sendMessageMethod) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(message.getChatId()));
-        try {
-            switch (state) {
-                case EMPTY:
-                    sendMessage.setText("Неизвестная команда");
-                    break;
-                case START:
-                    sendMessage.setText("Привет, я создан чтобы управлять анализатором акций. Чтобы начать введи: /create_session");
-                    break;
-                case CREATE_SESSION:
-                    telegramParser.signIn();
-                    sendMessage.setText("Сессия создана. Сейчас тебе придет пятизначный код для входа в телеграм. Его необходимо отправить в сообщении формата '1.2.3.4.5'");
-                    break;
-                case SEND_CODE:
-                    telegramParser.enterCode(parseCode(message.getText()));
-                    sendMessage.setText("Код введен. Для начала анализа введи: /analyze");
-                    break;
-                case START_ANALYZE:
-                    sendMessageMethod.accept("Собираю данные...");
-                    telegramParser.collectData();
-                    sendMessage.setText("Сбор данных завершен");
-            }
-        } catch (Exception e) {
-            return null;
+        if (telegramParser.getBotMessageSend() == null) {
+            telegramParser.setBotMessageSend(sendMessageMethod);
         }
+
+        switch (state) {
+            case EMPTY:
+                sendMessage.setText("Неизвестная команда");
+                break;
+            case START:
+                sendMessage.setText("Привет, я создан чтобы управлять анализатором акций. Чтобы начать введи: /create_session");
+                break;
+            case CREATE_SESSION:
+                telegramParser.signIn();
+                sendMessage.setText("Сессия создана. Сейчас тебе придет пятизначный код для входа в телеграм. Его необходимо отправить в сообщении формата '1.2.3.4.5'");
+                break;
+            case SEND_CODE:
+                telegramParser.enterCode(parseCode(message.getText()));
+                sendMessage.setText("Код введен. Для начала анализа введи: /analyze");
+                break;
+            case START_ANALYZE:
+                Thread collectDataThread = new Thread(telegramParser);
+                collectDataThread.start();
+                sendMessage.setText("Собираю данные...");
+        }
+
         return sendMessage;
     }
 
