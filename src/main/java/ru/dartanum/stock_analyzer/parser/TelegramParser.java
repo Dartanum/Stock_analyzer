@@ -1,34 +1,26 @@
 package ru.dartanum.stock_analyzer.parser;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
-import org.openqa.selenium.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.dartanum.stock_analyzer.domain.Channel;
 import ru.dartanum.stock_analyzer.domain.Post;
 import ru.dartanum.stock_analyzer.repository.ChannelRepository;
 import ru.dartanum.stock_analyzer.repository.PostRepository;
 
-import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
-@Setter
-@Getter
 @RequiredArgsConstructor
-public class TelegramParser implements Runnable {
+public class TelegramParser {
     private final WebDriver webDriver;
     private final PostRepository postRepository;
     private final ChannelRepository channelRepository;
@@ -44,7 +36,6 @@ public class TelegramParser implements Runnable {
     private int minWordsInMessage;
     @Value("#{'${values.parser.key-words}'.toLowerCase().split(',')}")
     private List<String> keyWords;
-    private Consumer<String> botMessageSend;
 
     public void signIn() {
         webDriver.get("https://web.telegram.org/k/");
@@ -58,18 +49,14 @@ public class TelegramParser implements Runnable {
         webDriver.findElement(By.xpath("//input[@type='tel']")).sendKeys(code);
     }
 
-    @Override
-    public void run() {
-        collectData();
-    }
-
-    private void collectData() {
+    public Set<Post> parse() {
         JavascriptExecutor jse = (JavascriptExecutor) webDriver;
         LocalDateTime limitDate = LocalDateTime.now().minusDays(dayRange);
         List<Channel> channels = channelRepository.findAll();
         List<String> channelNames = channels.stream().map(Channel::getName).collect(toList());
         Set<Post> collectedPosts = new LinkedHashSet<>();
         Set<Post> savedPosts = new LinkedHashSet<>();
+        Set<Post> result = new LinkedHashSet<>();
 
         try {
             //webDriver.get("C:\\Users\\Dartanum\\Desktop\\Telegram Web2.html");
@@ -78,10 +65,13 @@ public class TelegramParser implements Runnable {
             channelsLiElementByName.forEach((channelName, entry) -> {
                 Channel channel = channelRepository.findByName(channelName);
                 savedPosts.clear();
+                collectedPosts.clear();
                 savedPosts.addAll(postRepository.findAllByChannel(channel));
+
                 entry.click();
                 try {
                     WebElement buttonScrollDown = webDriver.findElement(By.className("bubbles-go-down"));
+                    //*[@id="column-center"]/div/div/div[4]/div/button[1]
                     buttonScrollDown.click();
                 } catch (Exception e) {}
 
@@ -123,18 +113,14 @@ public class TelegramParser implements Runnable {
                         jse.executeScript(scrollUpScript); //TODO replace
                     }
                 } while (firstMessageDate != null && firstMessageDate.isAfter(limitDate));
-                try {
-                    postRepository.saveAll(diffSet(collectedPosts, savedPosts));
-                } catch (ConstraintViolationException e) {
-                    e.printStackTrace();
-                }
-                collectedPosts.clear();
+                result.addAll(diffSet(collectedPosts, savedPosts));
             });
-            botMessageSend.accept("Сбор данных завершен");
+
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
-            botMessageSend.accept("Произошла ошибка во время сбора данных");
         }
+        return null;
     }
 
 //-----------------------------------implementation-----------------------------------

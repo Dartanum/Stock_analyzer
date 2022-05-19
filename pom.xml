@@ -74,6 +74,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.ptnplanet</groupId>
+            <artifactId>Java-Naive-Bayes-Classifier</artifactId>
+            <version>1.0.7</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -94,4 +99,10 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 </project>

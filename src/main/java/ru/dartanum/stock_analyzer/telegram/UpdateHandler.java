@@ -51,6 +51,7 @@ public class UpdateHandler {
         if (lastState != null) {
             state = lastState;
         }
+
         switch (inputMsg) {
             case "/start":
                 state = START;

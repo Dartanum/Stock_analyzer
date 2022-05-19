@@ -23,3 +23,5 @@ values:
     number-of-days-for-collect-data: 3
     min-words-in-message: 8
     key-words: BTC,LUNA,ETH
+  classifier:
+    capacity: 3000

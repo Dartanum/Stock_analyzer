@@ -28,6 +28,10 @@ public class Post {
     @JoinColumn(name = "channel_id", nullable = false)
     Channel channel;
 
+    @Enumerated(EnumType.STRING)
+    Category category;
+    float probability;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
