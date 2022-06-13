@@ -19,9 +19,18 @@ server:
   port: 8080
 
 values:
+  channels:
+    - Channel 1
+    - Channel 2
+    - Channel 3
   parser:
-    number-of-days-for-collect-data: 3
+    number-of-days-for-collect-data:
+      min: 0
+      max: 7
     min-words-in-message: 8
-    key-words: BTC,LUNA,ETH
+    key-words:
+      -BTC
+      -LUNA
+      -ETH
   classifier:
     capacity: 3000

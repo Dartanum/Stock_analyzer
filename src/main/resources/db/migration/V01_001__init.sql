@@ -7,7 +7,7 @@ create table channel
 create table post
 (
     id            bigint not null primary key,
-    content       text unique,
+    content       text,
     channel_id    int    not null references channel,
     creation_date timestamp,
     category      varchar(15),
@@ -15,3 +15,4 @@ create table post
 );
 
 create sequence post_sq increment by 1 start with 1 owned by post.id;
+create sequence channel_sq increment by 1 start with 1 owned by channel.id;
