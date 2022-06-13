@@ -13,13 +13,15 @@ import ru.dartanum.stock_analyzer.domain.Category;
 import ru.dartanum.stock_analyzer.domain.Post;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toSet;
 import static org.springframework.util.FileCopyUtils.copyToString;
 import static ru.dartanum.stock_analyzer.domain.Category.*;
 
@@ -27,25 +29,37 @@ import static ru.dartanum.stock_analyzer.domain.Category.*;
 @Component
 @RequiredArgsConstructor
 public class AnalyzerImpl implements Analyzer {
+    private static final float INACCURACY_PERCENT = 5f;
+
     private final BayesClassifier<String, Category> bayesClassifier;
 
     @Value("classpath:learning/positive.txt")
     private Resource positiveWordsSource;
     @Value("classpath:learning/negative.txt")
     private Resource negativeWordsSource;
-    @Value("classpath:learning/neutral.txt")
-    private Resource neutralWordsSource;
 
     @Override
     public Set<Post> analyze(Set<Post> data) {
         data.forEach(post -> {
-            Classification<String, Category> result = bayesClassifier.classify(Arrays.stream(post.getContent().split("\\s"))
-                    .filter(str -> !str.startsWith("#"))
-                    .map(str -> str.replaceAll("[^а-яА-Я]", ""))
-                    .filter(str -> str.matches("[а-яА-Я]+"))
-                    .collect(Collectors.toList()));
+            Classification<String, Category> result = bayesClassifier.classifyDetailed(Arrays.stream(post.getContent().split("\\s"))
+                            .filter(str -> !str.startsWith("#"))
+                            .map(str -> str.replaceAll("[^а-яА-Я]", ""))
+                            .filter(str -> str.matches("[а-яА-Я]+"))
+                            .collect(Collectors.toList()))
+                    .stream()
+                    .reduce((classification, classification2) -> {
+                        float prob1 = classification.getProbability();
+                        float prob2 = classification2.getProbability();
+                        float percentageDifferent = abs(prob1 / prob2 * 100 - 100);
+
+                        if (percentageDifferent <= INACCURACY_PERCENT) {
+                            return new Classification<>(classification.getFeatureset(), NEUTRAL);
+                        } else {
+                            return prob1 > prob2 ? classification : classification2;
+                        }
+                    })
+                    .orElseThrow();
             post.setCategory(result.getCategory());
-            post.setProbability(result.getProbability());
         });
 
         return data;
@@ -53,20 +67,18 @@ public class AnalyzerImpl implements Analyzer {
 
     @Override
     public Pair<Category, Float> getVerdict(Set<Post> data) {
-        Pair<Category, Float> result;
-        List<Pair<Category, Pair<Integer, Float>>> stats = new LinkedList<>();
-        Arrays.stream(values()).forEach(category -> stats.add(Pair.of(category, getStats(data, category))));
-        var maxBySize = Collections.max(stats, Comparator.comparingInt(o -> o.getSecond().getFirst()));
-        var maxByWeight = Collections.max(stats, (o1, o2) -> Float.compare(o1.getSecond().getSecond(), o2.getSecond().getSecond()));
-        float totalWeight = data.stream().map(Post::getProbability).reduce((res, weight) -> res += weight).orElse(0f);
+        List<Pair<Category, Long>> stats = new LinkedList<>();
+        Arrays.stream(Category.values()).forEach(category -> stats.add(Pair.of(
+                category,
+                data.stream().filter(post -> post.getCategory() == category).count()))
+        );
+        var maxBySize = Collections.max(stats, Comparator.comparingLong(Pair::getSecond));
 
-        if (maxByWeight.getSecond().getSecond() > maxBySize.getSecond().getSecond() * 2) {
-            result = Pair.of(maxByWeight.getFirst(), maxByWeight.getSecond().getSecond() / totalWeight);
-        } else {
-            result = Pair.of(maxBySize.getFirst(), (float) maxBySize.getSecond().getFirst() / data.size());
+        if (stats.stream().filter(entry -> entry.getSecond().equals(maxBySize.getSecond())).map(Pair::getSecond).count() > 1) {
+            return Pair.of(UNDEFINED, 1.0f);
         }
 
-        return result;
+        return Pair.of(maxBySize.getFirst(), (float) maxBySize.getSecond() / data.size());
     }
 
     @PostConstruct
@@ -80,19 +92,9 @@ public class AnalyzerImpl implements Analyzer {
             String[] negativeWords = copyToString(negativeWordsReader).split("[\r\n]+");
             bayesClassifier.learn(Category.NEGATIVE, asList(negativeWords));
 
-            Reader neutralWordsReader = new InputStreamReader(neutralWordsSource.getInputStream(), UTF_8);
-            String[] neutralWords = copyToString(neutralWordsReader).split("[\r\n]+");
-            bayesClassifier.learn(Category.NEUTRAL, asList(neutralWords));
             log.info("Classifier has learned");
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private Pair<Integer, Float> getStats(Set<Post> data, Category category) {
-        Set<Post> filteredPosts = data.stream().filter(post -> post.getCategory() == category).collect(toSet());
-        float weight = filteredPosts.stream().map(Post::getProbability).reduce((res, item) -> res += item).orElse(0f);
-
-        return Pair.of(filteredPosts.size(), weight);
     }
 }

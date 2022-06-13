@@ -1,8 +1,6 @@
 package ru.dartanum.stock_analyzer.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
@@ -13,6 +11,9 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Post {
     @Id
@@ -30,7 +31,6 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     Category category;
-    float probability;
 
     @Override
     public boolean equals(Object o) {
