@@ -1,12 +1,12 @@
 package ru.dartanum.stock_analyzer.adapter.persistence;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.dartanum.stock_analyzer.app.api.repository.ChannelRepository;
-import ru.dartanum.stock_analyzer.domain.Channel;
+import ru.dartanum.stock_analyzer.domain.news.Channel;
 import ru.dartanum.stock_analyzer.framework.spring.ValuesProperties;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -30,7 +30,7 @@ public class ChannelJpaRepositoryAdapter implements ChannelRepository {
     @PostConstruct
     private void loadChannels() {
         List<Channel> savedChannels = channelJpaRepository.findAll();
-        List<String> savedChannelNames = savedChannels.stream().map(Channel::getName).collect(toList());
+        List<String> savedChannelNames = savedChannels.stream().map(Channel::getName).toList();
         List<String> channelNames = valuesProperties.getChannels();
 
         List<Channel> channelsForDeleting = savedChannels.stream()

@@ -2,8 +2,8 @@ package ru.dartanum.stock_analyzer.adapter.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.dartanum.stock_analyzer.domain.Channel;
-import ru.dartanum.stock_analyzer.domain.Post;
+import ru.dartanum.stock_analyzer.domain.news.Channel;
+import ru.dartanum.stock_analyzer.domain.news.Post;
 
 import java.time.LocalDateTime;
 import java.util.List;

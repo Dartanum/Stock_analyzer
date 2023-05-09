@@ -3,8 +3,8 @@ package ru.dartanum.stock_analyzer.adapter.persistence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.dartanum.stock_analyzer.app.api.repository.PostRepository;
-import ru.dartanum.stock_analyzer.domain.Channel;
-import ru.dartanum.stock_analyzer.domain.Post;
+import ru.dartanum.stock_analyzer.domain.news.Channel;
+import ru.dartanum.stock_analyzer.domain.news.Post;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
