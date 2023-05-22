@@ -55,11 +55,11 @@ public class ModelCreator {
 
     public static String[] downloadHistoryData(String figi, String tickerName) {
         int currentYear = LocalDate.now().getYear();
-        HistoryDataDownloader.downloadForYear(figi, String.valueOf(currentYear), tickerName);
+        HistoryDataDownloader.downloadForYear(figi, tickerName, String.valueOf(currentYear));
         String filePathForCurrentYear = HistoryDataDownloader.HISTORY_DATA_PATH + tickerName + (currentYear) + ".zip";
 
         if (LocalDate.now().getDayOfYear() < LEARNING_PERIOD) {
-            HistoryDataDownloader.downloadForYear(figi, String.valueOf(currentYear - 1), tickerName);
+            HistoryDataDownloader.downloadForYear(figi, tickerName, String.valueOf(currentYear - 1));
             return new String[]{
                     filePathForCurrentYear,
                     HistoryDataDownloader.HISTORY_DATA_PATH + tickerName + (currentYear - 1) + ".zip",

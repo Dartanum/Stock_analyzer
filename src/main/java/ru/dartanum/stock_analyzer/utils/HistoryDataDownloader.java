@@ -79,7 +79,12 @@ public class HistoryDataDownloader {
 
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                var filePath = Path.of(HISTORY_DATA_PATH + filePrefix.toLowerCase() + "/" + filePrefix + year + ".zip");
+                var dir = Path.of(HISTORY_DATA_PATH + filePrefix.toLowerCase());
+                if (!Files.exists(dir)) {
+                    Files.createDirectory(dir);
+                }
+
+                var filePath = Path.of(HISTORY_DATA_PATH + filePrefix.toLowerCase()+ "/" + filePrefix + year + ".zip");
                 if (!Files.exists(filePath)) {
                     Files.createFile(filePath);
                 }

@@ -28,7 +28,7 @@ public class AppConfiguration {
         options.addArguments("--remote-allow-origins=*");
         WebDriver driver = new ChromeDriver(options);
         driver.manage().timeouts()
-                .pageLoadTimeout(Duration.ofSeconds(10))
+                .pageLoadTimeout(Duration.ofSeconds(15))
                 .implicitlyWait(Duration.ofSeconds(5))
                 .scriptTimeout(Duration.ofSeconds(5));
 

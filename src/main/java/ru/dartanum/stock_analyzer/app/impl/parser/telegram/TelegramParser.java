@@ -75,16 +75,20 @@ public class TelegramParser {
 
             entry.click();
             try {
-                //wait(1000);
-                WebElement buttonGoDown = new WebDriverWait(webDriver, Duration.ofSeconds(3))
-                        .until(ExpectedConditions.elementToBeClickable(By.className("bubbles-go-down")));
-                buttonGoDown.click();
-                log.info("Go down button clicked");
+                WebElement buttonGoDown;
+                do {
+                    try {
+                        buttonGoDown = new WebDriverWait(webDriver, Duration.ofSeconds(3))
+                                .until(ExpectedConditions.elementToBeClickable(By.className("bubbles-go-down")));
+                    } catch (TimeoutException e) {
+                        break;
+                    }
+                    buttonGoDown.click();
+                    log.info("Go down button clicked");
+                } while (buttonGoDown != null);
             } catch (WebDriverException e) {
                 log.info("Go down button is not present");
-            } /*catch (InterruptedException e) {
-                e.printStackTrace();
-            }*/
+            }
 
             List<WebElement> messagePortion;
             LocalDateTime firstMessageDate;
